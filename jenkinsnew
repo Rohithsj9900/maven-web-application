@@ -1,0 +1,22 @@
+node{
+    def mavenHome = tool name: "maven3.8.5"
+    //checkout stage
+    stage('checkoutcode'){
+        git branch: 'development', credentialsId: 'dbdb062c-665d-432d-9a64-a76de86fcb49', url: 'https://github.com/Rohithsj9900/maven-web-application.git'
+    }
+    //Build stage
+    stage('Build'){
+        sh "$mavenHome/bin/mvn clean package"
+    }
+    //Upload Artifact into Artifactory repo
+    stage('uploadArtifactsIntoNexus'){
+        sh "$mavenHome/bin/mvn deploy"
+    }
+    //Deploy App into Tomcat server
+    stage('DeployAppIntoTomcat'){
+        sshagent(['11eb1bca-0882-4053-9c98-235c7c650852']) {
+    // some block
+    sh "scp-0 strictHostkeychecking=no target/maven-web-application.war ec2-user@15.207.222.20:/opt/apache-tomcat-9.0.80/webapps"
+}
+    }
+}//node closing
